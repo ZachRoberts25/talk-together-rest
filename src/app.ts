@@ -1,12 +1,13 @@
-import { getCreators } from './services/creator';
+import { getCreator, getCreators } from './services/creator';
 import { getContent, createContent, approveContent } from './services/content';
 import { firebaseConfig } from './firebase-config';
 import express from 'express';
 import admin from 'firebase-admin';
 import { json } from 'body-parser';
+import cors from 'cors';
 
-const PORT = 3000;
-const HOST = '0.0.0.0';
+const PORT = 4200;
+const HOST = 'localhost';
 
 const app = express();
 admin.initializeApp({
@@ -27,10 +28,15 @@ const withAuthorization = async (
   res.locals.userId = id.uid;
   next();
 };
-
+// app.use(
+//   cors({
+//     credentials: true,
+//   })
+// );
 app.use(json());
 app.use((req, res, next) => {
   console.log(`Requesting: ${req.url}`);
+  res.setHeader('Access-Control-Allow-Origin', '*');
   next();
 });
 
@@ -57,11 +63,16 @@ app.get('/content', async (req, res) => {
   res.send(content);
 });
 
+app.get('/creator/:id', async (req, res) => {
+  const creator = await getCreator(req.params.id);
+  return res.send(creator).status(200);
+});
+
 app.get('/creators', async (req, res) => {
-  const creators = await getCreators(
-    parseInt(req.query.page as string),
-    parseInt(req.query.pageSize as string)
-  );
+  const creators = await getCreators();
 
   res.send(creators);
 });
+
+app.listen(PORT, HOST);
+console.log(`Running on http://${HOST}:${PORT}`);
