@@ -4,7 +4,6 @@ import { firebaseConfig } from './firebase-config';
 import express from 'express';
 import admin from 'firebase-admin';
 import { json } from 'body-parser';
-import cors from 'cors';
 
 const PORT = 4200;
 const HOST = 'localhost';
@@ -28,11 +27,7 @@ const withAuthorization = async (
   res.locals.userId = id.uid;
   next();
 };
-// app.use(
-//   cors({
-//     credentials: true,
-//   })
-// );
+
 app.use(json());
 app.use((req, res, next) => {
   console.log(`Requesting: ${req.url}`);
