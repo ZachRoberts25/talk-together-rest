@@ -4,6 +4,7 @@ import { firebaseConfig } from './firebase-config';
 import express from 'express';
 import admin from 'firebase-admin';
 import { json } from 'body-parser';
+import cors from 'cors';
 
 const PORT = 4200;
 const HOST = 'localhost';
@@ -17,6 +18,7 @@ const withAuthorization = async (
   res: express.Response,
   next: express.NextFunction
 ) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
   const jwt = req.headers.authorization!;
   if (!jwt) {
     // throw an
@@ -28,6 +30,13 @@ const withAuthorization = async (
   next();
 };
 
+app.use(
+  cors({
+    allowedHeaders: '*',
+    credentials: true,
+  })
+);
+
 app.use(json());
 app.use((req, res, next) => {
   console.log(`Requesting: ${req.url}`);
@@ -36,12 +45,14 @@ app.use((req, res, next) => {
 });
 
 app.post('/content', withAuthorization, async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
   await createContent({
     creatorId: res.locals.userId,
     summary: req.body.summary,
     file: req.body.file,
   });
-  res.status(204).send();
+  console.log('hello?');
+  res.status(204).send({});
 });
 
 app.post('/content/:contentId/approve', withAuthorization, async (req, res) => {
